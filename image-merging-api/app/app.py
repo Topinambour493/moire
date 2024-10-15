@@ -1,6 +1,10 @@
 import os
 import dotenv
 import convertapi
+from PIL import Image
+
+if not hasattr(Image, 'Resampling'):  # Pillow<9.0
+    Image.Resampling = Image
 from flask import (
     Flask,
     jsonify,
@@ -11,7 +15,7 @@ from flask import (
     url_for
 )
 from gh_md_to_html.core_converter import markdown
-from .utils import remove_bg
+from rembg import remove
 
 from .merger import Merger
 
@@ -41,14 +45,23 @@ def merge_gif():
     curr_directory = os.path.dirname(os.path.abspath(__file__))
     images_dir = curr_directory + "/images/"
     images_without_bg_dir = curr_directory + "/images_without_bg/"
-    convertapi.api_credentials = 'secret'
+    convertapi.api_credentials = ' secret_bcb654OblSYpUUg0'
     urls = convertapi.convert('png', {
         'File': gif
     }, from_format='gif').save_files(images_dir)
+    output_paths = []
+    img = Image.open(urls[0])
+    size = img.size
     for url in urls:
         name = os.path.basename(url)
-        remove_bg(url, url)
-    return jsonify(urls), 201
+        output_path = images_without_bg_dir + name
+        output_paths.append(output_path)
+        img = Image.open(url)
+        result = Image.new("RGBA", size, (0, 0, 0, 0))
+        out = remove(img)
+        result.paste(out, mask=out)
+        result.save(output_path)
+    return jsonify(output_paths), 201
 
 
 @app.route("/api/v1.0/merge-images/", methods=["OPTIONS", "POST"])
@@ -56,7 +69,7 @@ def merge():
     if request.method == "OPTIONS":
         return make_response(jsonify({"Allow": "POST"}), 200)
 
-    urls = request.json.get("urls",[])
+    urls = request.json.get("urls", [])
     background_color = request.json.get("backgroundColor", [0, 0, 0])
     foreground_color = request.json.get("foregroundColor", [255, 255, 255])
     if len(urls) < 2:
