@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "image-merging-api"
+version = "0.1.0"
+description = ""
+authors = ["cjezierski <corentin.jezierski@gmail.com>"]
+readme = "README.md"
+packages = [{include = "image_merging_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+autoenv = "1.0.0"
+flask = "2.1.2"
+gh-md-to-html = "1.21.1"
+gunicorn = "19.9.0"
+mistune = "2.0.0rc1"
+pillow = "9.0.1"
+pygments = "2.10.0"
+python-dotenv = "0.19.0"
+requests = "^2.24.0"
+werkzeug = "2.2.2"
+convertapi = "^2.0.0"
+backgroundremover = "^0.2.8"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
